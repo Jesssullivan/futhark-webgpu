@@ -1,0 +1,43 @@
+# Caddyfile for Futhark WebGPU Demos
+# Provides COOP/COEP headers required for SharedArrayBuffer and WebGPU
+#
+# Usage:
+#   caddy run --config Caddyfile
+#
+# Environment variables:
+#   DEMO_ROOT: Directory containing the compiled WebGPU demo files (default: ./examples/sebastian-example)
+
+{
+    admin off
+    auto_https off
+}
+
+http://:8080 {
+    # CRITICAL: Cross-Origin Isolation headers
+    # Required for:
+    # - SharedArrayBuffer (Futhark WASM multicore via Emscripten pthreads)
+    # - High-resolution performance.now() timing
+    # - WebGPU adapter access in some configurations
+    header Cross-Origin-Opener-Policy "same-origin"
+    header Cross-Origin-Embedder-Policy "credentialless"
+
+    # WASM files with correct MIME type
+    @wasm {
+        path *.wasm
+    }
+    header @wasm Content-Type "application/wasm"
+
+    # Health check
+    handle /healthz {
+        respond "OK" 200
+    }
+
+    # Serve static files from the demo directory
+    root * {$DEMO_ROOT:./examples/sebastian-example}
+    file_server
+
+    log {
+        output stderr
+        format console
+    }
+}
