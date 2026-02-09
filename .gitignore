@@ -1,0 +1,17 @@
+# Futhark generated artifacts
+*.wasm
+*.c
+*.json
+!flake.lock
+*.wrapper.js
+
+# Emscripten cache
+.emscripten_cache/
+em_cache/
+
+# Nix
+result
+result-*
+
+# OS
+.DS_Store
