@@ -1,0 +1,25 @@
+# Containerfile for Futhark WebGPU Mandelbrot Demo (Flask)
+#
+# Usage:
+#   podman build -t futhark-webgpu-flask -f Containerfile.flask .
+#   podman run --rm -p 8000:8000 futhark-webgpu-flask
+#
+#   Open http://localhost:8000/ in a WebGPU-capable browser
+
+FROM docker.io/library/python:3.12-slim
+
+RUN pip install --no-cache-dir flask
+
+WORKDIR /app
+
+COPY app.py .
+COPY examples/sebastian-example/*.html examples/sebastian-example/
+COPY examples/sebastian-example/*.js examples/sebastian-example/
+COPY examples/sebastian-example/*.wasm examples/sebastian-example/
+COPY examples/sebastian-example/*.json examples/sebastian-example/
+
+ENV DEMO_ROOT=/app/examples/sebastian-example
+
+EXPOSE 8000
+
+CMD ["python3", "app.py", "--port", "8000", "--host", "0.0.0.0"]
