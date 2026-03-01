@@ -1,35 +1,37 @@
-# Example: ARGB Canvas (Futhark WebGPU)
+# Example: ARGB Canvas Pixels (Futhark WebGPU)
 # Generates the JS/WASM wrapper bundle using:
-#   futhark webgpu --library -o pixels pixels.fut
+#   futhark webgpu --library -o build/pixels pixels.fut
 
-PROG := pixels
-FUT  := $(PROG).fut
+PROG  := pixels
+FUT   := $(PROG).fut
+BUILD := build
+OUT   := $(BUILD)/$(PROG)
 
-GEN  := $(PROG).js \
-        $(PROG).wasm \
-        $(PROG).json \
-        $(PROG).c \
-        $(PROG).wrapper.js
+GEN := $(OUT).js \
+       $(OUT).wasm \
+       $(OUT).json \
+       $(OUT).c \
+       $(OUT).wrapper.js
 
-.PHONY: all build clean serve run check
+.PHONY: all gen clean serve run check
 
-all: build
+all: gen
 
-# Build all generated artifacts (one invocation generates all of them)
-build: $(GEN)
+gen: $(GEN)
 
-$(GEN): $(FUT)
-	futhark webgpu --library -o $(PROG) $(FUT)
+$(BUILD):
+	mkdir -p $(BUILD)
+
+$(GEN): $(FUT) | $(BUILD)
+	futhark webgpu --library -o $(OUT) $(FUT)
 
 check:
 	futhark check $(FUT)
 
 clean:
-	rm -f $(GEN)
+	rm -rf $(BUILD)
 
-# Serve the folder so the browser can fetch the wasm/js
-serve: build
+serve: gen
 	python3 -m http.server 8000
 
-# Convenience alias
 run: serve

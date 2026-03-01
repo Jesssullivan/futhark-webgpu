@@ -1,6 +1,0 @@
-# Futhark WebGPU generated outputs
-pixels.js
-pixels.wasm
-pixels.json
-pixels.c
-pixels.wrapper.js
