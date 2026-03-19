@@ -1,39 +1,99 @@
 module m = import "lys"
 
-type^ state = m.lys.state
+entry init (seed: u32) (h: i32) (w: i32) =
+  m.pack_state (m.init_state seed (i64.i32 h) (i64.i32 w))
 
-entry init (seed: u32) (h: i32) (w: i32): state =
-  m.lys.init seed (i64.i32 h) (i64.i32 w)
+entry resize
+  (h: i32) (w: i32)
+  (time: f32)
+  (state_h: i32) (state_w: i32)
+  (center_y: i32) (center_x: i32)
+  (center_object: i32)
+  (moving_y: i32) (moving_x: i32)
+  (mouse_y: i32) (mouse_x: i32)
+  (radius: i32)
+  (paused: i32) =
+  let s =
+    m.unpack_state time state_h state_w center_y center_x center_object
+                   moving_y moving_x mouse_y mouse_x radius paused
+  in m.pack_state (m.resize_state (i64.i32 h) (i64.i32 w) s)
 
-entry grab_mouse: bool =
-  m.lys.grab_mouse
-
-entry resize (h: i32) (w: i32) (s: state): state =
-  m.lys.resize (i64.i32 h) (i64.i32 w) s
-
-entry key (e: i32) (key: i32) (s: state): state =
+entry key
+  (e: i32) (key: i32)
+  (time: f32)
+  (state_h: i32) (state_w: i32)
+  (center_y: i32) (center_x: i32)
+  (center_object: i32)
+  (moving_y: i32) (moving_x: i32)
+  (mouse_y: i32) (mouse_x: i32)
+  (radius: i32)
+  (paused: i32) =
+  let s =
+    m.unpack_state time state_h state_w center_y center_x center_object
+                   moving_y moving_x mouse_y mouse_x radius paused
   let e' = if e == 0 then #keydown {key} else #keyup {key}
-  in m.lys.event e' s
+  in m.pack_state (m.event_state e' s)
 
-entry mouse (buttons: i32) (x: i32) (y: i32) (s: state): state =
-  m.lys.event (#mouse {buttons, x, y}) s
+entry mouse
+  (buttons: i32) (x: i32) (y: i32)
+  (time: f32)
+  (state_h: i32) (state_w: i32)
+  (center_y: i32) (center_x: i32)
+  (center_object: i32)
+  (moving_y: i32) (moving_x: i32)
+  (mouse_y: i32) (mouse_x: i32)
+  (radius: i32)
+  (paused: i32) =
+  let s =
+    m.unpack_state time state_h state_w center_y center_x center_object
+                   moving_y moving_x mouse_y mouse_x radius paused
+  in m.pack_state (m.event_state (#mouse {buttons, x, y}) s)
 
-entry wheel (dx: i32) (dy: i32) (s: state): state =
-  m.lys.event (#wheel {dx, dy}) s
+entry wheel
+  (dx: i32) (dy: i32)
+  (time: f32)
+  (state_h: i32) (state_w: i32)
+  (center_y: i32) (center_x: i32)
+  (center_object: i32)
+  (moving_y: i32) (moving_x: i32)
+  (mouse_y: i32) (mouse_x: i32)
+  (radius: i32)
+  (paused: i32) =
+  let s =
+    m.unpack_state time state_h state_w center_y center_x center_object
+                   moving_y moving_x mouse_y mouse_x radius paused
+  in m.pack_state (m.event_state (#wheel {dx, dy}) s)
 
-entry step (td: f32) (s: state): state =
-  m.lys.event (#step td) s
+entry step
+  (td: f32)
+  (time: f32)
+  (state_h: i32) (state_w: i32)
+  (center_y: i32) (center_x: i32)
+  (center_object: i32)
+  (moving_y: i32) (moving_x: i32)
+  (mouse_y: i32) (mouse_x: i32)
+  (radius: i32)
+  (paused: i32) =
+  let s =
+    m.unpack_state time state_h state_w center_y center_x center_object
+                   moving_y moving_x mouse_y mouse_x radius paused
+  in m.pack_state (m.event_state (#step td) s)
 
-entry render (s: state) = m.lys.render s
-
-entry text_colour (s: state): u32 =
-  m.lys.text_colour s
-
-entry text_format: []u8 = m.lys.text_format ()
-
-entry text_content (render_duration: f32) (s: state) =
-  m.lys.text_content render_duration s
+entry render
+  (time: f32)
+  (state_h: i32) (state_w: i32)
+  (center_y: i32) (center_x: i32)
+  (center_object: i32)
+  (moving_y: i32) (moving_x: i32)
+  (mouse_y: i32) (mouse_x: i32)
+  (radius: i32)
+  (paused: i32)
+  : []u32 =
+  let s =
+    m.unpack_state time state_h state_w center_y center_x center_object
+                   moving_y moving_x mouse_y mouse_x radius paused
+  in flatten (m.render_state s)
 
 entry render_once (seed: u32) (h: i32) (w: i32): []u32 =
-  let s = m.lys.init seed (i64.i32 h) (i64.i32 w)
-  in flatten (m.lys.render s)
+  let s = m.init_state seed (i64.i32 h) (i64.i32 w)
+  in flatten (m.render_state s)
